@@ -1,47 +1,54 @@
-# Fetch Dog Adoption App
+# 🐶 Fetch Dog Adoption App
 
-This is a React-based frontend application built with TypeScript and Vite for browsing adoptable dogs. Users can filter by breed, sort results, paginate through listings, and favorite dogs to find their best match.
+Welcome to the **Fetch Dog Adoption App**, a React + TypeScript single-page application (SPA) that lets users browse and favorite adoptable dogs. Users can filter by breed, sort by different criteria, and even get matched with a dog from their favorites.
 
-## Features
+## 🚀 Live Demo
 
-- User login via name and email
-- Filter dogs by breed
-- Sort results by name, breed, or age (ascending or descending)
-- Paginated results with consistent sorting
-- Favorite/unfavorite dogs
-- Match a dog from the favorites list using the `/dogs/match` endpoint
-- Scroll to matched dog automatically
-- Responsive design using Material UI (MUI)
-- Logout functionality that clears session and favorites
+Check out the deployed app: [https://fetch-dog-adoption-app.vercel.app/](https://fetch-dog-adoption-app.vercel.app/)
 
-## Technologies Used
+## 📂 GitHub Repository
 
-- React + TypeScript
+This project is hosted on GitHub: [jbloch100/fetch-dog-adoption-app](https://github.com/jbloch100/fetch-dog-adoption-app)
+
+## 🧰 Tech Stack
+
+- React
+- TypeScript
 - Vite
 - Axios
-- React Router DOM
 - Material UI (MUI)
+- Vercel (Deployment)
 
-## Project Structure
+## 🔑 Features
+
+- 🔐 Login with name and email
+- 📚 Browse all adoptable dogs
+- 🔎 Filter dogs by breed
+- ↕️ Sort by breed, name, or age
+- ❤️ Favorite dogs
+- 🎯 Match with a dog from your favorites
+- 🔄 Pagination support with cursor-based navigation
+- 🚪 Logout functionality
+
+## 📦 Installation
+
+To run locally:
 
 ```bash
-src/
-├── api/           # API utility functions
-├── components/    # Shared components (NavBar)
-├── context/       # Global state management (AppContext)
-├── pages/         # Page components (Login, Search)
-├── types/         # Type definitions
-├── App.tsx        # Main app component
-└── main.tsx       # Entry point
+git clone https://github.com/jbloch100/fetch-dog-adoption-app.git
+cd fetch-dog-adoption-app
+npm install
+npm run dev
 ```
 
-## Deployment
+## ✅ Requirements Fulfilled
 
-This app is deployable via [Vercel](https://vercel.com/).
+- All features implemented according to the specifications.
+- Clean UI with responsive pagination and filtering.
+- Authentication integrated.
+- User state (favorites) maintained in context.
+- Deployed and tested on Vercel.
 
-- Build command: `npm run build`
-- Output directory: `dist`
+---
 
-## License
-
-This project is for educational/demo purposes.
+Built with ❤️ by [jbloch100](https://github.com/jbloch100)
