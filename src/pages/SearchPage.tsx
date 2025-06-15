@@ -29,6 +29,7 @@ import {
 const SearchPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [searchParams, setSearchParams] = useSearchParams();
+  const initialCursor = searchParams.get("cursor");
   const [selectedBreed, setSelectedBreed] = useState(
     searchParams.get("breed") || "All"
   );
@@ -37,7 +38,7 @@ const SearchPage: React.FC = () => {
   );
   const [breeds, setBreeds] = useState<string[]>([]);
   const [dogs, setDogs] = useState<any[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [prevCursor, setPrevCursor] = useState<string | null>(null);
   const [match, setMatch] = useState<any | null>(null);
@@ -58,12 +59,6 @@ const SearchPage: React.FC = () => {
       setBreeds(unique);
     });
   }, []);
-
-  useEffect(() => {
-    setCursor(null);
-    setNextCursor(null);
-    setPrevCursor(null);
-  }, [sort, selectedBreed]);
 
   useEffect(() => {
     const params: any = {};
