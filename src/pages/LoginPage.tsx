@@ -12,16 +12,34 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     try {
+      // Step 1: Attempt login
       await axios.post(
         'https://frontend-take-home-service.fetch.com/auth/login',
         { name, email },
         { withCredentials: true }
       );
 
-      dispatch({ type: 'LOGIN', payload: { name, email } });
+      // Step 2: Try fetching user from session
+      let user;
+      try {
+        const meRes = await axios.get(
+          'https://frontend-take-home-service.fetch.com/auth/me',
+          { withCredentials: true }
+        );
+        user = meRes.data;
+      } catch (meError) {
+        console.warn('⚠️ /auth/me failed, falling back to manual user:', meError);
+        user = { name, email }; // fallback in case /me fails
+      }
+
+      // Step 3: Store user and navigate
+      dispatch({ type: 'LOGIN', payload: user });
       navigate('/search');
-    } catch (err) {
+    } catch (err: any) {
+      console.error('❌ Login failed:', err);
       setError('Login failed. Please try again.');
     }
   };
