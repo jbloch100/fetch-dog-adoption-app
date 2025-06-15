@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useEffect,
+} from 'react';
 
 interface User {
   name: string;
@@ -17,11 +23,47 @@ type Action =
   | { type: 'LOGIN'; payload: User }
   | { type: 'LOGOUT' };
 
-const initialState: State = {
-  favorites: [],
-  user: null,
+// ✅ Load from localStorage right away
+const loadInitialState = (): State => {
+  try {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    return { favorites, user };
+  } catch {
+    return { favorites: [], user: null };
+  }
 };
 
+const AppContext = createContext<{
+  state: State;
+  dispatch: React.Dispatch<Action>;
+}>({ state: { favorites: [], user: null }, dispatch: () => null });
+
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(reducer, undefined, loadInitialState);
+
+  // 🔁 Sync favorites to localStorage
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(state.favorites));
+  }, [state.favorites]);
+
+  // 🔁 Sync user to localStorage
+  useEffect(() => {
+    if (state.user) {
+      localStorage.setItem('user', JSON.stringify(state.user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [state.user]);
+
+  return (
+    <AppContext.Provider value={{ state, dispatch }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+// 🧠 Pure reducer
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD_FAVORITE':
@@ -45,19 +87,6 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const AppContext = createContext<{
-  state: State;
-  dispatch: React.Dispatch<Action>;
-}>({ state: initialState, dispatch: () => null });
-
-export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppContext.Provider>
-  );
-};
-
 export const useAppContext = () => useContext(AppContext);
+
+export { reducer };

@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import NavBar from "../components/NavBar";
 import { logout } from "../api";
@@ -19,19 +20,37 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Box,
 } from "@mui/material";
+
+// Constant for default breed selection
+  const ALL_BREEDS = "All";
 
 const SearchPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedBreed, setSelectedBreed] = useState(
+    searchParams.get("breed") || "All"
+  );
+  const [sort, setSort] = useState(
+    searchParams.get("sort") || "breed:asc"
+  );
   const [breeds, setBreeds] = useState<string[]>([]);
   const [dogs, setDogs] = useState<any[]>([]);
-  const [selectedBreed, setSelectedBreed] = useState("");
-  const [sort, setSort] = useState("breed:asc");
   const [cursor, setCursor] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [prevCursor, setPrevCursor] = useState<string | null>(null);
   const [match, setMatch] = useState<any | null>(null);
   const matchRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const matchId = searchParams.get("match");
+    if (matchId) {
+      getDogsByIds([matchId]).then((res) => {
+        setMatch(res.data[0]);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     getBreeds().then((res) => {
@@ -45,6 +64,28 @@ const SearchPage: React.FC = () => {
     setNextCursor(null);
     setPrevCursor(null);
   }, [sort, selectedBreed]);
+
+  useEffect(() => {
+    const params: any = {};
+
+    if (selectedBreed && selectedBreed !== ALL_BREEDS) {
+      params.breed = selectedBreed;
+    }
+
+    if (sort) {
+      params.sort = sort;
+    }
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    if (match) {
+      params.match = match.id;
+    }
+
+    setSearchParams(params);
+  }, [selectedBreed, sort, cursor, match]);
 
   useEffect(() => {
     const [field, direction] = sort.split(":");
@@ -130,26 +171,26 @@ const SearchPage: React.FC = () => {
 
   return (
 
-    <div style={{ padding: "1rem" }}>
+    <Box sx={{ px: { xs: 2, sm: 4 }, py: 2 }}>
       <Typography variant="h5" align="center" sx={{ mt: 2, mb: 3 }}> Search Dogs </Typography>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={6}>
-          <FormControl fullWidth>
-            <InputLabel>Breed</InputLabel>
-            <Select value={selectedBreed} onChange={(e) => setSelectedBreed(e.target.value)} label="Breed">
-              <MenuItem value="All">All</MenuItem>
+      <Grid container spacing={2} alignItems="center" sx={{ flexDirection: { xs: "column", sm: "row"} }}>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth sx={{ mb: { xs: 2, sm: 0 } }}>
+            <InputLabel id="breed-label">Breed</InputLabel>
+            <Select labelId="breed-label" id="breed-select" value={selectedBreed} onChange={(e) => setSelectedBreed(e.target.value)} label="Breed" inputProps={{ 'aria-label': 'Breed' }}>
+              <MenuItem value={ALL_BREEDS}>{ALL_BREEDS}</MenuItem>
               {breeds.map((breed) => (
                 <MenuItem key={breed} value={breed}>{breed}</MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
-          <FormControl fullWidth>
-            <InputLabel>Sort</InputLabel>
-            <Select value={sort} onChange={(e) => setSort(e.target.value)} label="Sort">
-              <MenuItem value="breed:asc" disabled={selectedBreed !== "" && selectedBreed !== "All"}>Breed A-Z</MenuItem>
-              <MenuItem value="breed:desc" disabled={selectedBreed !== "" && selectedBreed !== "All"}>Breed Z-A</MenuItem>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth sx={{ mb: { xs: 2, sm: 0 } }}>
+            <InputLabel id="sort-label">Sort</InputLabel>
+            <Select labelId="sort-label" id="sort-select" value={sort} onChange={(e) => setSort(e.target.value)} label="Sort" inputProps={{ 'aria-label': 'Sort' }}>
+              <MenuItem value="breed:asc" disabled={selectedBreed !== ALL_BREEDS}>Breed A-Z</MenuItem>
+              <MenuItem value="breed:desc" disabled={selectedBreed !== ALL_BREEDS}>Breed Z-A</MenuItem>
               <MenuItem value="age:asc">Age Asc</MenuItem>
               <MenuItem value="age:desc">Age Desc</MenuItem>
               <MenuItem value="name:asc">Name A-Z</MenuItem>
@@ -160,10 +201,15 @@ const SearchPage: React.FC = () => {
       </Grid>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
+        {dogs.length === 0 && (
+          <Typography align="center" sx={{ mt: 4 }} color="text.secondary">
+            No dogs were found.
+          </Typography>
+        )}
         {dogs.map((dog) => (
           <Grid item xs={12} sm={6} md={4} key={dog.id}>
-            <Card>
-              <CardMedia component="img" height="200" image={dog.img} alt={dog.name} />
+            <Card sx={{ mb: 2, mx: { xs: 1, sm: 2} }}>
+              <CardMedia component="img" image={dog.img} alt={dog.name} sx={{ height: 200, objectFit: "cover", width: "100%" }} />
               <CardContent>
                 <Typography variant="h6">{dog.name}</Typography>
                 <Typography>Breed: {dog.breed}</Typography>
@@ -203,15 +249,15 @@ const SearchPage: React.FC = () => {
       </div>
 
       {match && (
-        <div ref={matchRef} style={{ marginTop: "2rem", padding: "1rem", border: "2px solid green" }}>
+        <Box ref={matchRef} sx={{ mt: 4, p: 2, border: "2px solid green", display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "center", gap: 2, }}>
           <h2>You're matched with:</h2>
           <img src={match.img} alt={match.name} width="150" />
           <p>
             <strong>{match.name}</strong>, the {match.breed}, age {match.age}
           </p>
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
